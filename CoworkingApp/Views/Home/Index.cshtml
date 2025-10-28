@@ -1,0 +1,62 @@
+﻿@model IEnumerable<CoworkingApp.Models.TipoEspacio>
+
+@{
+    ViewData["Title"] = "Bienvenido a Startup Hub S.C.";
+}
+
+<div class="container-fluid text-center p-5 rounded-lg mb-5" style="background-color: var(--color-gris-claro);">
+    <div class="container py-5">
+        <h1 class="display-3">Startup Hub S.C.</h1>
+        <p class="lead" style="font-size: 1.5rem; color: var(--texto-secundario);">Conéctate. Crea. Crece.</p>
+        <p class="mt-4">El ecosistema perfecto para que tus ideas despeguen. Encuentra el espacio de trabajo flexible que necesitas, cuando lo necesitas.</p>
+        <a class="btn btn-primary btn-lg mt-3" asp-controller="Store" asp-action="Index" role="button">Ver Paquetes de Créditos</a>
+    </div>
+</div>
+
+<div class="container text-center py-5">
+    <h2 class="mb-5">Un Flujo de Trabajo Simple y Eficiente</h2>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="p-3">
+                <i class="fas fa-coins fa-3x mb-3 text-primary"></i>
+                <h4>1. Elige tu Paquete</h4>
+                <p class="text-muted">Compra créditos de forma flexible. Más horas, mayores beneficios.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-3">
+                <i class="fas fa-calendar-alt fa-3x mb-3 text-primary"></i>
+                <h4>2. Reserva tu Espacio</h4>
+                <p class="text-muted">Usa nuestro selector interactivo para encontrar y reservar tu espacio al instante.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-3">
+                <i class="fas fa-rocket fa-3x mb-3 text-primary"></i>
+                <h4>3. Empieza a Crear</h4>
+                <p class="text-muted">Llega, conéctate y ponte a trabajar. Nosotros nos encargamos del resto.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr class="section-separator" />
+
+<div class="container py-5">
+    <h2 class="text-center mb-5">Nuestros Espacios</h2>
+    <div class="row">
+        @foreach (var item in Model)
+        {
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center d-flex flex-column">
+                        <h5 class="card-title mt-3">@Html.DisplayFor(modelItem => item.Nombre)</h5>
+                        <p class="text-muted">@Html.DisplayFor(modelItem => item.Description)</p>
+                        <p class="card-text mt-auto"><strong>Costo:</strong> @Html.DisplayFor(modelItem => item.CostoCreditosHora) créditos/hora</p>
+                        <a asp-controller="Reserva" asp-action="Crear" asp-route-tipoEspacioId="@item.Id" class="btn btn-secondary mt-3">Reservar Ahora</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

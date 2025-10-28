@@ -1,0 +1,84 @@
+﻿@model CoworkingApp.Models.ViewModels.DashboardViewModel
+@using System.Security.Claims
+
+@{
+    ViewData["Title"] = "Mi Panel de Control";
+    var userEmail = User.FindFirstValue(ClaimTypes.Name);
+}
+
+<div class="container py-5">
+    <h1 class="display-5 mb-1">Bienvenido de nuevo, @userEmail!</h1>
+    <p class="lead text-muted mb-5">Este es tu centro de control.</p>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <h4 class="mb-3">Tu Próxima Reserva</h4>
+            @if (Model.ProximasReservas.Any())
+            {
+                var proximaReserva = Model.ProximasReservas.First();
+                <div class="card shadow-sm mb-5">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-bell fa-2x text-primary me-3"></i>
+                            <div>
+                                <h5 class="card-title mb-0">@proximaReserva.TipoEspacio.Nombre</h5>
+                                <p class="card-text text-muted mb-0">
+                                    @proximaReserva.FechaInicio.ToString("dddd, dd MMMM 'a las' HH:mm")
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="card card-body text-center shadow-sm mb-5 p-4">
+                    <p class="mb-0">No tienes próximas reservas.</p>
+                    <p class="text-muted small">¡Es un buen momento para planificar tu próxima sesión de trabajo!</p>
+                </div>
+            }
+
+            <h4 class="mb-3">Historial de Reservas</h4>
+            @if (Model.ReservasPasadas.Any())
+            {
+                <div class="card shadow-sm">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="border-0 ps-4">Espacio</th>
+                                    <th class="border-0">Fecha</th>
+                                    <th class="border-0">Duración</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.ReservasPasadas)
+                                {
+                                    <tr>
+                                        <td class="ps-4">@item.TipoEspacio.Nombre</td>
+                                        <td>@item.FechaInicio.ToString("dd/MM/yyyy")</td>
+                                        <td>@((item.FechaFin - item.FechaInicio).TotalHours) horas</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <p class="text-muted">Tu historial de reservas aparecerá aquí.</p>
+            }
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm text-center p-4 position-sticky" style="top: 20px;">
+                <h5 class="mb-3">Saldo de Créditos</h5>
+                <p class="display-2 fw-bold text-primary mb-1">@Model.CreditosDisponibles.ToString("F1")</p>
+                <p class="text-muted mt-0 mb-4">Créditos disponibles</p>
+                <a class="btn btn-primary w-100 mb-2" asp-controller="Home" asp-action="Index">Reservar un Espacio</a>
+                <a class="btn btn-outline-primary w-100" asp-controller="Store" asp-action="Index">Comprar más Créditos</a>
+            </div>
+        </div>
+    </div>
+</div>

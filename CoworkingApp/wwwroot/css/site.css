@@ -1,0 +1,134 @@
+/* Definición de la Paleta de Colores de Startup Hub S.C. */
+:root {
+    --color-primario: #004aad; /* Azul Cobalto para acciones y marca */
+    --color-secundario: #20c997; /* Verde Menta para éxito y disponibilidad */
+    --color-acento: #fd7e14; /* Coral Suave para alertas y ocupado */
+    --color-fondo: #f8f9fa; /* Blanco Roto para el fondo general */
+    --color-gris-claro: #e9ecef; /* Gris para bordes y separadores */
+    --texto-principal: #212529; /* Negro suave para textos */
+    --texto-secundario: #6c757d; /* Gris para textos menos importantes */
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500&display=swap');
+
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--color-fondo);
+    color: var(--texto-principal);
+}
+
+.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
+  color: var(--bs-secondary-color);
+  text-align: end;
+}
+
+.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
+  text-align: start;
+}
+
+/* Estilo para Botones Principales */
+.btn-primary {
+    background-color: var(--color-primario);
+    border-color: var(--color-primario);
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 74, 173, 0.3);
+    }
+
+/* --- MEJORAS DE DISEÑO --- */
+
+/* 1. Tarjetas (Cards) Mejoradas */
+.card {
+    border: none; /* Elimina los bordes feos */
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Transición suave */
+}
+
+    .card:hover {
+        transform: translateY(-5px); /* Efecto de "levantarse" */
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); /* Sombra más pronunciada */
+    }
+
+/* 2. Separador de Secciones Elegante */
+.section-separator {
+    border: 0;
+    height: 1px;
+    background-image: linear-gradient(to right, rgba(0, 0, 0, 0), var(--color-gris-claro), rgba(0, 0, 0, 0));
+    margin: 4rem 0; /* Más espacio vertical entre secciones */
+}
+
+/* 3. Animación de Fundido para Carga de Página */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+main {
+    animation: fadeIn 0.5s ease-in-out;
+}
+/* --- MEJORAS DEL HEADER --- */
+
+/* Estilo para los botones de Login/Register */
+.navbar-nav .btn-outline-primary {
+    border-radius: 8px;
+    padding: 6px 16px;
+}
+
+/* Ajustes para el menú desplegable del usuario */
+.dropdown-toggle::after {
+    display: inline-block;
+    margin-left: .255em;
+    vertical-align: .255em;
+    content: "";
+    border-top: .3em solid;
+    border-right: .3em solid transparent;
+    border-bottom: 0;
+    border-left: .3em solid transparent;
+}
+
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border-radius: 8px;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+}
+
+    .dropdown-item i {
+        color: var(--texto-secundario);
+    }

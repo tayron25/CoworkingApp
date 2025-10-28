@@ -1,0 +1,62 @@
+﻿@model IEnumerable<ApplicationUser>
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    ViewData["Title"] = "Administración de Usuarios";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Usuario (Email)</th>
+            <th>Roles</th>
+            <th>Acciones</th>
+            <th>Acciones de Reservas</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.Email</td>
+                <td>
+                    @{
+                        // Obtenemos los roles de forma asíncrona y los unimos con una coma
+                        var roles = await UserManager.GetRolesAsync(user);
+                        <span>@string.Join(", ", roles)</span>
+                    }
+                </td>
+                <td>
+                    @if (roles.Contains("Admin"))
+                    {
+                        // Si el usuario es Admin, mostramos el botón para quitar el rol
+                        // No se puede quitar el rol a uno mismo
+                        if ((await UserManager.GetUserAsync(User)).Id != user.Id)
+                        {
+                            <form asp-action="DemoteFromAdmin" method="post">
+                                <input type="hidden" name="userId" value="@user.Id" />
+                                <button type="submit" class="btn btn-warning btn-sm">Quitar Admin</button>
+                            </form>
+                        }
+                    }
+                    else
+                    {
+                        // Si no es Admin, mostramos el botón para promoverlo
+                        <form asp-action="PromoteToAdmin" method="post">
+                            <input type="hidden" name="userId" value="@user.Id" />
+                            <button type="submit" class="btn btn-success btn-sm">Hacer Admin</button>
+                        </form>
+                    }
+                </td>
+                <td>
+                    <a asp-action="ViewReservations" asp-route-userId="@user.Id" class="btn btn-info btn-sm">
+                        Ver Reservas
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

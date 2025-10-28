@@ -1,0 +1,50 @@
+﻿@model IEnumerable<CoworkingApp.Models.Reserva>
+
+@{
+    ViewData["Title"] = "Reservas de " + ViewBag.UserEmail;
+}
+
+<h1>@ViewData["Title"]</h1>
+<hr />
+
+@if (Model.Any())
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Espacio Reservado</th>
+                <th>Desde</th>
+                <th>Hasta</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.TipoEspacio.Nombre)</td>
+                    <td>@item.FechaInicio.ToString("g")</td>
+                    <td>@item.FechaFin.ToString("g")</td>
+                    <td>
+                        <form asp-action="DeleteReservation" method="post">
+                            <input type="hidden" name="reservationId" value="@item.Id" />
+                            <input type="hidden" name="userId" value="@ViewBag.UserId" />
+                            <button type="submit" class="btn btn-outline-danger btn-sm"
+                                    onclick="return confirm('¿Confirmas la eliminación de esta reserva?');">
+                                Eliminar
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="alert alert-info">Este usuario no tiene ninguna reserva.</div>
+}
+
+<div class="mt-3">
+    <a asp-action="Index">Volver a la lista de usuarios</a>
+</div>

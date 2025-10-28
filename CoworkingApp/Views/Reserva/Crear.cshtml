@@ -1,0 +1,252 @@
+﻿@model CoworkingApp.Models.Reserva
+
+@{
+    ViewData["Title"] = "Crear Reserva";
+    var today = Model.FechaInicio.ToString("yyyy-MM-dd");
+}
+
+<style>
+    /* Estilos para el selector de horarios (sin cambios) */
+    .hour-slot {
+        border: 1px solid #ddd;
+        padding: 10px;
+        margin: 5px;
+        border-radius: 5px;
+        cursor: pointer;
+        text-align: center;
+        font-weight: bold;
+        transition: background-color 0.2s, color 0.2s, transform 0.2s;
+        flex-grow: 1;
+        min-width: 60px;
+    }
+
+        .hour-slot:hover:not(.disabled):not(.occupied) {
+            transform: scale(1.05);
+            background-color: #e9f5ff;
+        }
+
+        .hour-slot.available {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+
+        .hour-slot.occupied {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+            cursor: not-allowed;
+        }
+
+        .hour-slot.disabled {
+            background-color: #f0f0f0;
+            color: #aaa;
+            cursor: not-allowed;
+        }
+
+        .hour-slot.selected {
+            background-color: #007bff;
+            color: white;
+            border-color: #0056b3;
+        }
+</style>
+
+<h1>Crear Reserva</h1>
+<h4>Espacio: @ViewBag.TipoEspacioNombre</h4>
+<hr />
+
+<form asp-action="Crear">
+    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+    <input type="hidden" asp-for="TipoEspacioId" />
+    <input type="hidden" asp-for="FechaInicio" id="hiddenFechaInicio" />
+    <input type="hidden" asp-for="FechaFin" id="hiddenFechaFin" />
+
+    <div class="row">
+        <div class="col-md-8">
+            <h4>1. Elige una fecha</h4>
+            <div class="d-flex align-items-center mb-3">
+                <button type="button" id="prevDay" class="btn btn-outline-secondary">&lt;</button>
+                <input type="date" id="datePicker" class="form-control mx-2" value="@today" />
+                <button type="button" id="nextDay" class="btn btn-outline-secondary">&gt;</button>
+            </div>
+
+            <h4>2. Haz clic en la hora de inicio (y opcionalmente en la hora de fin)</h4>
+            <div id="scheduleContainer" class="d-flex flex-wrap">
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card position-sticky" style="top: 20px;">
+                <div class="card-body">
+                    <h5 class="card-title">Resumen de tu Reserva</h5>
+                    <p id="summaryText">Por favor, selecciona una hora de inicio.</p>
+                    <div class="form-group mt-3">
+                        <input type="submit" value="Confirmar Reserva" class="btn btn-primary w-100" id="submitButton" disabled />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="mt-3">
+    <a asp-controller="Home" asp-action="Index">Volver al Catálogo</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Referencias a elementos del DOM
+            const datePicker = document.getElementById('datePicker');
+            const prevDayBtn = document.getElementById('prevDay');
+            const nextDayBtn = document.getElementById('nextDay');
+            const scheduleContainer = document.getElementById('scheduleContainer');
+            const hiddenFechaInicio = document.getElementById('hiddenFechaInicio');
+            const hiddenFechaFin = document.getElementById('hiddenFechaFin');
+            const submitButton = document.getElementById('submitButton');
+            const summaryText = document.getElementById('summaryText');
+            const tipoEspacioId = document.querySelector('input[name="TipoEspacioId"]').value;
+
+            // Variables de estado para la selección
+            let startHour = null;
+            let endHour = null;
+            let occupiedHoursCache = [];
+
+            // --- FUNCIÓN fetchAndRenderSchedule (sin cambios) ---
+            async function fetchAndRenderSchedule() {
+                const selectedDate = datePicker.value;
+                if (!selectedDate) return;
+                scheduleContainer.innerHTML = '<div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>';
+
+                try {
+                    const cacheBuster = new Date().getTime();
+                    const response = await fetch(`/Reserva/GetOccupiedHours?tipoEspacioId=${tipoEspacioId}&date=${selectedDate}&_=${cacheBuster}`);
+                    if (!response.ok) throw new Error('Error al cargar datos de disponibilidad.');
+
+                    occupiedHoursCache = await response.json();
+                    renderSchedule(selectedDate, occupiedHoursCache);
+                } catch (error) {
+                    scheduleContainer.innerHTML = `<p class="text-danger">${error.message}</p>`;
+                }
+            }
+
+            // --- FUNCIÓN renderSchedule (sin cambios) ---
+            function renderSchedule(selectedDate, occupiedHours) {
+                scheduleContainer.innerHTML = '';
+                const now = new Date();
+                const selectedDateObj = new Date(selectedDate + 'T00:00:00');
+
+                for (let hour = 0; hour < 24; hour++) {
+                    const slot = document.createElement('div');
+                    slot.classList.add('hour-slot');
+                    slot.innerText = `${hour}:00`;
+                    slot.dataset.hour = hour;
+                    const slotDateTime = new Date(selectedDateObj);
+                    slotDateTime.setHours(hour);
+                    let status = occupiedHours.includes(hour) ? 'occupied' : (slotDateTime < now ? 'disabled' : 'available');
+                    slot.classList.add(status);
+                    scheduleContainer.appendChild(slot);
+                }
+            }
+
+            // --- LÓGICA DE SELECCIÓN DE RANGO (sin cambios) ---
+            scheduleContainer.addEventListener('click', function(e) {
+                const target = e.target;
+                if (!target.classList.contains('hour-slot') || target.classList.contains('disabled') || target.classList.contains('occupied')) return;
+
+                const clickedHour = parseInt(target.dataset.hour);
+
+                if (startHour === null || endHour !== null) {
+                    startHour = clickedHour;
+                    endHour = null;
+                } else {
+                    let tempEndHour = clickedHour;
+                    const min = Math.min(startHour, tempEndHour);
+                    const max = Math.max(startHour, tempEndHour);
+
+                    let isRangeValid = true;
+                    for(let i = min; i <= max; i++) {
+                        if(occupiedHoursCache.includes(i)) {
+                            isRangeValid = false;
+                            break;
+                        }
+                    }
+
+                    if(!isRangeValid) {
+                        startHour = clickedHour;
+                        endHour = null;
+                        alert("El rango seleccionado incluye horas no disponibles. Por favor, selecciona un rango válido.");
+                    } else {
+                        endHour = tempEndHour;
+                    }
+                }
+                updateUIAndSummary();
+            });
+
+            // --- FUNCIÓN PARA FORMATEAR FECHAS SIN CONVERSIÓN DE ZONA HORARIA ---
+            function toLocalISOString(date) {
+                const pad = (num) => num.toString().padStart(2, '0');
+                return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+            }
+
+            // --- FUNCIÓN CENTRALIZADA PARA ACTUALIZAR (CORREGIDA) ---
+            function updateUIAndSummary() {
+                // Actualiza la UI visual
+                document.querySelectorAll('.hour-slot.selected').forEach(el => el.classList.remove('selected'));
+                if (startHour !== null) {
+                    const finalEnd = endHour === null ? startHour : endHour;
+                    for (let i = Math.min(startHour, finalEnd); i <= Math.max(startHour, finalEnd); i++) {
+                        const slot = scheduleContainer.querySelector(`.hour-slot[data-hour='${i}']`);
+                        if (slot) slot.classList.add('selected');
+                    }
+                }
+
+                // Actualiza el resumen y los campos del formulario
+                if (startHour !== null) {
+                    const date = datePicker.value;
+                    const finalEnd = endHour === null ? startHour : endHour;
+                    const finalStartHour = Math.min(startHour, finalEnd);
+                    const finalEndHour = Math.max(startHour, finalEnd) + 1;
+
+                    const startTime = new Date(`${date}T${finalStartHour.toString().padStart(2, '0')}:00:00`);
+                    const endTime = new Date(`${date}T${finalEndHour.toString().padStart(2, '0')}:00:00`);
+
+                    // CORRECCIÓN CLAVE: Usamos la nueva función para evitar la conversión a UTC
+                    hiddenFechaInicio.value = toLocalISOString(startTime);
+                    hiddenFechaFin.value = toLocalISOString(endTime);
+
+                    summaryText.innerHTML = `<strong>Fecha:</strong> ${startTime.toLocaleDateString()}<br>
+                                             <strong>Desde:</strong> ${startTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}<br>
+                                             <strong>Hasta:</strong> ${endTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+                    submitButton.disabled = false;
+                } else {
+                    hiddenFechaInicio.value = '';
+                    hiddenFechaFin.value = '';
+                    summaryText.innerHTML = 'Por favor, selecciona una hora de inicio.';
+                    submitButton.disabled = true;
+                }
+            }
+
+            // --- MANEJADORES DE FECHA (sin cambios) ---
+            function changeDay(offset) {
+                const currentDate = new Date(datePicker.value + 'T00:00:00');
+                currentDate.setDate(currentDate.getDate() + offset);
+                datePicker.value = currentDate.toISOString().split('T')[0];
+                startHour = null;
+                endHour = null;
+                updateUIAndSummary();
+                fetchAndRenderSchedule();
+            }
+
+            datePicker.addEventListener('change', () => changeDay(0));
+            prevDayBtn.addEventListener('click', () => changeDay(-1));
+            nextDayBtn.addEventListener('click', () => changeDay(1));
+
+            // Carga inicial
+            fetchAndRenderSchedule();
+        });
+    </script>
+}
