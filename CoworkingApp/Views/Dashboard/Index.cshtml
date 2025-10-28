@@ -76,8 +76,7 @@
                 <h5 class="mb-3">Saldo de Créditos</h5>
                 <p class="display-2 fw-bold text-primary mb-1">@Model.CreditosDisponibles.ToString("F1")</p>
                 <p class="text-muted mt-0 mb-4">Créditos disponibles</p>
-                <a class="btn btn-primary w-100 mb-2" asp-controller="Home" asp-action="Index">Reservar un Espacio</a>
-                <a class="btn btn-outline-primary w-100" asp-controller="Store" asp-action="Index">Comprar más Créditos</a>
+                <a class="btn btn-primary w-100 mb-2" asp-controller="Home" asp-action="Index" asp-fragment="nuestros-espacios">Reservar un Espacio</a>                <a class="btn btn-outline-primary w-100" asp-controller="Store" asp-action="Index">Comprar más Créditos</a>
             </div>
         </div>
     </div>
