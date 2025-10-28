@@ -15,6 +15,8 @@
             <th>Roles</th>
             <th>Acciones</th>
             <th>Acciones de Reservas</th>
+            <th>Acciones de Cuenta</th>
+        </tr>
         </tr>
     </thead>
     <tbody>
@@ -55,6 +57,18 @@
                     <a asp-action="ViewReservations" asp-route-userId="@user.Id" class="btn btn-info btn-sm">
                         Ver Reservas
                     </a>
+                </td>
+                <td>
+                    @if ((await UserManager.GetUserAsync(User)).Id != user.Id) // Muestra el botón solo si no es el admin actual
+                    {
+                        <form asp-action="DeleteUser" method="post">
+                            <input type="hidden" name="userId" value="@user.Id" />
+                            <button type="submit" class="btn btn-danger btn-sm"
+                                    onclick="return confirm('¡ATENCIÓN! ¿Estás seguro de que quieres eliminar PERMANENTEMENTE la cuenta de @user.Email? Todos sus datos se perderán.');">
+                                Eliminar Cuenta
+                            </button>
+                        </form>
+                    }
                 </td>
             </tr>
         }

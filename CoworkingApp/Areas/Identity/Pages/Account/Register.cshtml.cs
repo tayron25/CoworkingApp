@@ -115,7 +115,7 @@ namespace CoworkingApp.Areas.Identity.Pages.Account
             {
                 var user = CreateUser();
                 //Asignar creditos al usuario
-                user.CreditosDisponibles = 100;
+                //user.CreditosDisponibles = 100;
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);

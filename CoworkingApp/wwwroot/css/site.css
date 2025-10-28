@@ -129,6 +129,24 @@ main {
     padding: 10px 20px;
 }
 
-    .dropdown-item i {
+.dropdown-item i {
         color: var(--texto-secundario);
+    }
+/* Botón de Acción Vibrante (Verde) */
+.btn-action {
+    background-color: var(--color-secundario);
+    border-color: var(--color-secundario);
+    color: white;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-action:hover {
+        background-color: #1baa80; /* Un tono de verde un poco más oscuro */
+        border-color: #1baa80;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(32, 201, 151, 0.4);
     }

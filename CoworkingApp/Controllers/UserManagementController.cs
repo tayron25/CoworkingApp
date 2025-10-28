@@ -119,5 +119,29 @@ namespace CoworkingApp.Controllers
             // Redirige de vuelta a la lista de reservas del mismo usuario
             return RedirectToAction("ViewReservations", new { userId = userId });
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteUser(string userId)
+        {
+            var userToDelete = await _userManager.FindByIdAsync(userId);
+            var currentUser = await _userManager.GetUserAsync(User);
+
+            // Comprobación de seguridad: un admin no puede eliminar su propia cuenta.
+            if (userToDelete != null && userToDelete.Id != currentUser.Id)
+            {
+                var result = await _userManager.DeleteAsync(userToDelete);
+                if (result.Succeeded)
+                {
+                    TempData["SuccessMessage"] = $"La cuenta de {userToDelete.Email} ha sido eliminada.";
+                }
+            }
+            else
+            {
+                // Podrías añadir un mensaje de error aquí en el futuro.
+            }
+
+            return RedirectToAction("Index");
+        }
     }
 }
